@@ -1,0 +1,18 @@
+#!/bin/bash
+# Finds friends to play KanJam™
+
+org=$1
+pattern=${2:-$org}
+
+repos=$(curl -s https://api.github.com/orgs/$org/repos | jq -r '.[].clone_url')
+
+for repo in $repos
+do
+    path=$(mktemp -d)
+    git clone -q --bare $repo $path
+    cd $path
+    git --no-pager log --author=$pattern --pretty=tformat:%ae
+    cd - >/dev/null
+    rm -rf $path
+    sleep $(shuf -i 1-5 -n 1)
+done
